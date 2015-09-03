@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,6 +35,9 @@ import java.util.logging.Logger;
 public class HelpMenuActions {
 
 	public static final class GettingStarted implements Listener {
+		@Inject
+		public GettingStarted() {}
+
 		public void handleEvent(Event event) {
 			new GettingStartedDialog().open();
 		}
@@ -42,6 +46,7 @@ public class HelpMenuActions {
 	public static final class CommandLineUsage implements Listener {
 		private CommandLineProcessor cli;
 
+		@Inject
 		public CommandLineUsage(CommandLineProcessor cli) {
 			this.cli = cli;
 		}
@@ -56,8 +61,7 @@ public class HelpMenuActions {
 	public static final class About implements Listener {
 		private AboutDialog aboutDialog;
 
-		public About(AboutDialog aboutDialog) {
-			super();
+		@Inject public About(AboutDialog aboutDialog) {
 			this.aboutDialog = aboutDialog;
 		}
 
@@ -66,19 +70,28 @@ public class HelpMenuActions {
 		}
 	}
 
-	public static final class Website implements Listener { 		
+	public static final class Website implements Listener {
+		@Inject
+		public Website() {}
+
 		public void handleEvent(Event event) {
 			BrowserLauncher.openURL(Version.WEBSITE);
 		}
 	}
 
-	public static final class FAQ implements Listener { 		
+	public static final class FAQ implements Listener {
+		@Inject
+		public FAQ() {}
+
 		public void handleEvent(Event event) {
 			BrowserLauncher.openURL(Version.FAQ_URL);
 		}
 	}
 
-	public static final class Plugins implements Listener { 		
+	public static final class Plugins implements Listener {
+		@Inject
+		public Plugins() {}
+
 		public void handleEvent(Event event) {
 			BrowserLauncher.openURL(Version.PLUGINS_URL);
 		}
@@ -87,7 +100,7 @@ public class HelpMenuActions {
 	public static final class CheckVersion implements Listener {
 		private final StatusBar statusBar;
 		
-		public CheckVersion(StatusBar statusBar) {
+		@Inject public CheckVersion(StatusBar statusBar) {
 			this.statusBar = statusBar;
 		}
 

@@ -37,10 +37,10 @@ public final class Labels {
 		initialize(Locale.getDefault());
 	}
 	
-	private Labels() {
+	Labels() {
 		// private constructor
 	}
-	
+
 	public static Labels getInstance() {
 		return instance;
 	}

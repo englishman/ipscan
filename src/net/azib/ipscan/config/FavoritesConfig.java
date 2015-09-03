@@ -9,13 +9,18 @@ import java.util.prefs.Preferences;
 
 import net.azib.ipscan.feeders.FeederCreator;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * FavoritesConfig
  *
  * @author Anton Keks
  */
+@Singleton
 public class FavoritesConfig extends NamedListConfig {
 
+	@Inject
 	public FavoritesConfig(Preferences preferences) {
 		super(preferences, "favorites");
 	}

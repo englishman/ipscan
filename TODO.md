@@ -1,4 +1,5 @@
-* Replace picocontainer with dagger: http://square.github.io/dagger/
+* New flat and retina-compatible icons :-)
+
 * Add URLFetcher with configurable URL and JSON/XPath expression
 * WHOIS fetcher
 

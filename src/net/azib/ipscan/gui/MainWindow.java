@@ -13,10 +13,10 @@ import net.azib.ipscan.core.state.ScanningState;
 import net.azib.ipscan.core.state.StateMachine;
 import net.azib.ipscan.core.state.StateMachine.Transition;
 import net.azib.ipscan.core.state.StateTransitionListener;
-import net.azib.ipscan.gui.MainMenu.CommandsMenu;
 import net.azib.ipscan.gui.actions.StartStopScanningAction;
 import net.azib.ipscan.gui.actions.ToolsActions;
 import net.azib.ipscan.gui.feeders.FeederGUIRegistry;
+import net.azib.ipscan.gui.menu.ResultsContextMenu;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -24,6 +24,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static net.azib.ipscan.gui.util.LayoutHelper.formData;
 
@@ -49,18 +52,26 @@ public class MainWindow {
 	private StatusBar statusBar;
 	private ToolBar prefsButton;
 	private ToolBar fetchersButton;
-		
+
 	/**
 	 * Creates and initializes the main window.
 	 */
-	public MainWindow(Shell shell, GUIConfig guiConfig, Composite feederArea, Composite controlsArea, Combo feederSelectionCombo, Button startStopButton, StartStopScanningAction startStopScanningAction, ResultTable resultTable, StatusBar statusBar, CommandsMenu resultsContextMenu, FeederGUIRegistry feederGUIRegistry, final StateMachine stateMachine, ToolsActions.Preferences preferencesListener, ToolsActions.ChooseFetchers chooseFetchersListsner) {
+	@Inject
+	public MainWindow(Shell shell, GUIConfig guiConfig, @Named("feederArea") Composite feederArea,
+					  @Named("controlsArea") Composite controlsArea, @Named("feederSelectionCombo") Combo feederSelectionCombo,
+					  @Named("startStopButton") Button startStopButton, StartStopScanningAction startStopScanningAction,
+					  ResultTable resultTable, StatusBar statusBar, ResultsContextMenu resultsContextMenu,
+					  FeederGUIRegistry feederGUIRegistry, final StateMachine stateMachine,
+					  ToolsActions.Preferences preferencesListener, ToolsActions.ChooseFetchers chooseFetchersListener,
+					  MainMenu menuBar /* don't delete: initiates main menu creation */ ) {
+
 		this.shell = shell;
 		this.guiConfig = guiConfig;
 		this.statusBar = statusBar;
-		
+
 		initShell(shell);
 		initFeederArea(feederArea, feederGUIRegistry);
-		initControlsArea(controlsArea, feederSelectionCombo, startStopButton, startStopScanningAction, preferencesListener, chooseFetchersListsner);
+		initControlsArea(controlsArea, feederSelectionCombo, startStopButton, startStopScanningAction, preferencesListener, chooseFetchersListener);
 		initTableAndStatusBar(resultTable, resultsContextMenu, statusBar);
 
 		// after all controls are initialized, resize and open
@@ -132,7 +143,7 @@ public class MainWindow {
 	/**
 	 * This method initializes resultTable	
 	 */
-	private void initTableAndStatusBar(ResultTable resultTable, CommandsMenu resultsContextMenu, StatusBar statusBar) {
+	private void initTableAndStatusBar(ResultTable resultTable, Menu resultsContextMenu, StatusBar statusBar) {
 		resultTable.setLayoutData(formData(new FormAttachment(0), new FormAttachment(100), new FormAttachment(feederArea), new FormAttachment(statusBar.getComposite())));
 		resultTable.setMenu(resultsContextMenu);
 	}

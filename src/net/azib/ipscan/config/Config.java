@@ -29,7 +29,7 @@ public final class Config {
 	/** openers are stored here */
 	private OpenersConfig openersConfig;
 
-	private Config() {
+	Config() {
 		preferences = Preferences.userRoot().node("ipscan");
 		scannerConfig = new ScannerConfig(preferences);
 		guiConfig = new GUIConfig(preferences);
@@ -37,7 +37,7 @@ public final class Config {
 		openersConfig = new OpenersConfig(preferences);
 		language = preferences.get("language", "system");
 	}
-	
+
 	/**
 	 * Initializes the singleton instance
 	 */
@@ -77,7 +77,7 @@ public final class Config {
 	/**
 	 * @return Openers config (only local access);
 	 */
-	OpenersConfig forOpeners() {
+	public OpenersConfig forOpeners() {
 		return openersConfig;
 	}
 	

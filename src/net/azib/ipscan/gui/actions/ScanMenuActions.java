@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,19 +40,15 @@ public class ScanMenuActions {
 
 	public static boolean isLoadedFromFile = false;
 
-	public static final class Quit implements Listener {
-		public void handleEvent(Event event) {
-			event.display.getActiveShell().close();
-		}
-	}
-
 	public static class LoadFromFile implements Listener {
-		private TXTExporter txtExporter;
+
+		private final TXTExporter txtExporter;
 		private final ExporterRegistry exporterRegistry;
-		private FeederGUIRegistry feederRegistry;
+		private final FeederGUIRegistry feederRegistry;
 		private final ResultTable resultTable;
 		private final StateMachine stateMachine;
 
+		@Inject
 		public LoadFromFile(TXTExporter txtExporter, ExporterRegistry exporterRegistry, FeederGUIRegistry feederRegistry, ResultTable resultTable, StateMachine stateMachine) {
 			this.txtExporter = txtExporter;
 			this.exporterRegistry = exporterRegistry;
@@ -96,14 +93,24 @@ public class ScanMenuActions {
 				if (!results.isEmpty()) {
 					String lastLoadedIP = results.get(results.size()-1).getAddress().getHostAddress();
 					String[] feederIPs = feederRegistry.current().serialize();
-					if (!lastLoadedIP.equals(feederIPs[1]))
-						stateMachine.transitionToNext(); // we need to continue previous scan
+
+					if (resumePreviousScan(lastLoadedIP, feederIPs[1]))
+						stateMachine.transitionToNext();
 				}
 
 			}
 			catch (Exception e) {
 				throw new UserErrorException("fileLoad.failed", e);
 			}
+		}
+
+		private boolean resumePreviousScan(String lastIP, String endIP) {
+			if (lastIP.equals(endIP)) return false;
+
+			MessageBox box = new MessageBox(resultTable.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.SHEET);
+			box.setText(Labels.getLabel("menu.scan.load").replace("&", ""));
+			box.setMessage(Labels.getLabel("text.scan.resume").replace("%LASTIP", lastIP).replace("%ENDIP", endIP));
+			return box.open() == SWT.YES;
 		}
 
 		private void addFileExtensions(List<String> extensions, List<String> descriptions, StringBuffer sb) {
@@ -198,14 +205,26 @@ public class ScanMenuActions {
 	}
 
 	public static final class SaveAll extends SaveResults {
+		@Inject
 		public SaveAll(ExporterRegistry exporterRegistry, ResultTable resultTable, StatusBar statusBar, StateMachine stateMachine) {
 			super(exporterRegistry, resultTable, statusBar, stateMachine, false);
 		}
 	}
 
 	public static final class SaveSelection extends SaveResults {
+		@Inject
 		public SaveSelection(ExporterRegistry exporterRegistry, ResultTable resultTable, StatusBar statusBar, StateMachine stateMachine) {
 			super(exporterRegistry, resultTable, statusBar, stateMachine, true);
+		}
+	}
+
+	public static final class Quit implements Listener {
+		@Inject
+		public Quit() {
+		}
+
+		public void handleEvent(Event event) {
+			event.display.getActiveShell().close();
 		}
 	}
 

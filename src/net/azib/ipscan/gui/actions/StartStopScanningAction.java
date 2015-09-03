@@ -26,6 +26,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.net.InetAddress;
 
 /**
@@ -34,6 +37,7 @@ import java.net.InetAddress;
  * 
  * @author Anton Keks
  */
+@Singleton
 public class StartStopScanningAction implements SelectionListener, ScanningProgressCallback, StateTransitionListener {
 	
 	private ScannerDispatcherThreadFactory scannerThreadFactory;
@@ -75,8 +79,11 @@ public class StartStopScanningAction implements SelectionListener, ScanningProgr
 		buttonTexts[ScanningState.STOPPING.ordinal()] = Labels.getLabel("button.kill");
 		buttonTexts[ScanningState.KILLING.ordinal()] = Labels.getLabel("button.kill");
 	}
-	
-	public StartStopScanningAction(ScannerDispatcherThreadFactory scannerThreadFactory, StateMachine stateMachine, ResultTable resultTable, StatusBar statusBar, FeederGUIRegistry feederRegistry, PingerRegistry pingerRegistry, Button startStopButton, GUIConfig guiConfig) {
+
+	@Inject
+	public StartStopScanningAction(ScannerDispatcherThreadFactory scannerThreadFactory, StateMachine stateMachine, ResultTable resultTable,
+								   StatusBar statusBar, FeederGUIRegistry feederRegistry, PingerRegistry pingerRegistry,
+								   @Named("startStopButton") Button startStopButton, GUIConfig guiConfig) {
 		this(startStopButton.getDisplay());
 
 		this.scannerThreadFactory = scannerThreadFactory;
@@ -117,7 +124,7 @@ public class StartStopScanningAction implements SelectionListener, ScanningProgr
 		stateMachine.transitionToNext();
 	}
 
-	private final boolean preScanChecks() {
+	private boolean preScanChecks() {
 		// autodetect usable pingers and silently ignore any changes - 
 		// user should see any errors only if they have explicitly selected a pinger
 		pingerRegistry.checkSelectedPinger();
@@ -191,7 +198,7 @@ public class StartStopScanningAction implements SelectionListener, ScanningProgr
 	/**
 	 * @return the appropriate ResultsCallback instance, depending on the configured display method.
 	 */
-	private final ScanningResultCallback createResultsCallback(ScanningState state) {
+	private ScanningResultCallback createResultsCallback(ScanningState state) {
 		// rescanning must follow the same strategy of displaying all hosts (even the dead ones), because the results are already in the list
 		if (guiConfig.displayMethod == DisplayMethod.ALL || state == ScanningState.RESTARTING) {
 			return new ScanningResultCallback() {

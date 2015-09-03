@@ -11,6 +11,7 @@ import net.azib.ipscan.fetchers.PingFetcher;
 import net.azib.ipscan.fetchers.PortsFetcher;
 import net.azib.ipscan.gui.feeders.AbstractFeederGUI;
 
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static net.azib.ipscan.core.ScanningResult.ResultType.*;
 import static net.azib.ipscan.util.IOUtils.closeQuietly;
+import static net.azib.ipscan.util.InetAddressUtils.increment;
 
 /**
  * TXT Exporter
@@ -31,8 +33,9 @@ import static net.azib.ipscan.util.IOUtils.closeQuietly;
  * @author Anton Keks
  */
 public class TXTExporter extends AbstractExporter {
-	
 	int[] padLengths;
+
+	@Inject public TXTExporter() {}
 
 	public String getId() {
 		return "exporter.txt";
@@ -108,9 +111,9 @@ public class TXTExporter extends AbstractExporter {
 		try {
 			reader = new BufferedReader(new FileReader(fileName));
 
-			String originalStartIP = null;
-			String startIPAfterLoad = null;
-			String endIp = null;
+			String startIP = null;
+			String endIP = null;
+			String lastLoadedIP = null;
 
 			int ipIndex = 0, pingIndex = 1, portsIndex = 3;
 			String ipLabel = Labels.getLabel(IPFetcher.ID);
@@ -122,9 +125,8 @@ public class TXTExporter extends AbstractExporter {
 				String[] sp = line.split("\\s+");
 
 				if (i == 4) {
-					originalStartIP = sp[1];
-					startIPAfterLoad = sp[1];
-					endIp = sp[3];
+					startIP = sp[1];
+					endIP = sp[3];
 				}
 
 				if (ipLabel.equals(sp[ipIndex])) {
@@ -135,7 +137,7 @@ public class TXTExporter extends AbstractExporter {
 				if (sp.length < 3 || i < 8) continue;
 
 				InetAddress addr = InetAddress.getByName(sp[ipIndex]);
-				startIPAfterLoad = sp[ipIndex];
+				lastLoadedIP = sp[ipIndex];
 
 				ScanningResult r = new ScanningResult(addr, sp.length);
 				if (portsIndex > 0 && sp[portsIndex].matches("\\d.*")) r.setType(WITH_PORTS);
@@ -146,7 +148,12 @@ public class TXTExporter extends AbstractExporter {
 				results.add(r);
 			}
 
-			feeder.unserialize(startIPAfterLoad, endIp);
+			if (lastLoadedIP != null && !lastLoadedIP.equals(endIP)) {
+				InetAddress nextStartIP = increment(InetAddress.getByName(lastLoadedIP));
+				startIP = nextStartIP.getHostAddress();
+			}
+
+			feeder.unserialize(startIP, endIP);
 			return results;
 		}
 		finally {
